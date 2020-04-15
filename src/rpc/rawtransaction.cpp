@@ -27,8 +27,8 @@
 
 #include <stdint.h>
 
-#include <univalue.h>
 #include <boost/assign/list_of.hpp>
+#include <univalue.h>
 
 using namespace boost;
 using namespace boost::assign;
@@ -59,15 +59,17 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, UniValue& out, bool fInclud
 }
 
 
-void PoSBlockInfoToJSON(const uint256 hashBlock, int64_t nTime, int height, UniValue& entry) {
+void PoSBlockInfoToJSON(const uint256 hashBlock, int64_t nTime, int height, UniValue& entry)
+{
     entry.push_back(Pair("posblockhash", hashBlock.GetHex()));
     entry.push_back(Pair("time", nTime));
     entry.push_back(Pair("height", height));
-    entry.push_back(Pair("isauditsuccessful", nTime > 0? "true":"false"));
+    entry.push_back(Pair("isauditsuccessful", nTime > 0 ? "true" : "false"));
 }
 
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
 {
+    pwalletMain->IsTransactionForMe(tx);
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
     entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
@@ -88,9 +90,9 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
         else {
             {
                 //decoys
-            	UniValue decoys(UniValue::VARR);
+                UniValue decoys(UniValue::VARR);
                 std::vector<COutPoint> allDecoys = txin.decoys;
-                srand (time(NULL));
+                srand(time(NULL));
                 allDecoys.insert(allDecoys.begin(), txin.prevout);
                 for (size_t i = 0; i < allDecoys.size(); i++) {
                     UniValue decoy(UniValue::VOBJ);
@@ -125,7 +127,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
         }
         in.push_back(Pair("sequence", (int64_t)txin.nSequence));
         in.push_back(Pair("keyimage", txin.keyImage.GetHex()));
-        in.push_back(Pair("ringsize", (int64_t) (txin.decoys.size() + 1)));
+        in.push_back(Pair("ringsize", (int64_t)(txin.decoys.size() + 1)));
         vin.push_back(in);
     }
     entry.push_back(Pair("vin", vin));
@@ -152,10 +154,10 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
             memset(zeroBlind, 0, 32);
             const unsigned char* pBlind;
             pwalletMain->RevealTxOutAmount(tx, txout, decodedAmount, blind);
-            if (txout.nValue >0) {
-            	pBlind = zeroBlind;
+            if (txout.nValue > 0) {
+                pBlind = zeroBlind;
             } else {
-            	pBlind = blind.begin();
+                pBlind = blind.begin();
             }
             out.push_back(Pair("decoded_amount", ValueFromAmount(decodedAmount)));
             out.push_back(Pair("isMine", true));
@@ -180,6 +182,89 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
                 entry.push_back(Pair("confirmations", 0));
         }
     }
+}
+
+UniValue crawlrawtransactions(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1) {
+        throw runtime_error("Syntax invalid!");
+    }
+
+    int nHeight = params[0].get_int();
+    if (nHeight > chainActive.Height()) {
+        throw JSONRPCError(RPC_INVALID_BLOCK_HEIGHT, "Block height is too high");
+    }
+    LOCK(cs_main);
+    CBlock block;
+    if (!ReadBlockFromDisk(block, chainActive[nHeight])) {
+        throw JSONRPCError(RPC_INVALID_BLOCK_HEIGHT, "Block cannot be read from disk");
+    }
+
+    UniValue bInfo(UniValue::VOBJ);
+    bInfo.push_back(Pair("height", (uint64_t)nHeight));
+    bInfo.push_back(Pair("blocktime", (uint64_t)block.nTime));
+    bInfo.push_back(Pair("blockhash", block.GetHash().GetHex()));
+    bInfo.push_back(Pair("previousblockhash", chainActive[nHeight - 1]->GetBlockHash().GetHex()));
+    uint256 nextBlockHash = nHeight < chainActive.Height() ? chainActive[nHeight]->GetBlockHash() : uint256(0);
+    bInfo.push_back(Pair("nextblockhash", nextBlockHash.GetHex()));
+
+    UniValue txns(UniValue::VARR);
+    for (size_t i = 0; i < block.vtx.size(); i++) {
+        UniValue entry(UniValue::VOBJ);
+        const CTransaction& tx = block.vtx[i];
+        entry.push_back(Pair("txid", tx.GetHash().GetHex()));
+        entry.push_back(Pair("version", tx.nVersion));
+        entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
+        entry.push_back(Pair("txfee", ValueFromAmount(tx.nTxFee)));
+        UniValue vin(UniValue::VARR);
+        int ringSize = 0;
+        for (const CTxIn& txin : tx.vin) {
+            UniValue decoys(UniValue::VARR);
+            UniValue in(UniValue::VOBJ);
+            if (tx.IsCoinBase())
+                in.push_back(Pair("coinbase", HexStr(txin.scriptSig.begin(), txin.scriptSig.end())));
+            else {
+                {
+                    //decoys
+                    std::vector<COutPoint> allDecoys = txin.decoys;
+                    srand(time(NULL));
+                    allDecoys.insert(allDecoys.begin(), txin.prevout);
+                    for (size_t i = 0; i < allDecoys.size(); i++) {
+                        UniValue decoy(UniValue::VOBJ);
+                        decoy.push_back(Pair("txid", allDecoys[i].hash.GetHex()));
+                        decoy.push_back(Pair("vout", (int64_t)allDecoys[i].n));
+                        decoys.push_back(decoy);
+                    }
+                    in.push_back(Pair("decoys", decoys));
+                }
+            }
+            in.push_back(Pair("keyimage", txin.keyImage.GetHex()));
+            ringSize = txin.decoys.size() + 1;
+            vin.push_back(in);
+        }
+        entry.push_back(Pair("vin", vin));
+        entry.push_back(Pair("ringsize", (int64_t)ringSize));
+        UniValue vout(UniValue::VARR);
+        for (unsigned int i = 0; i < tx.vout.size(); i++) {
+            const CTxOut& txout = tx.vout[i];
+            UniValue out(UniValue::VOBJ);
+            out.push_back(Pair("n", (int64_t)i));
+            UniValue o(UniValue::VOBJ);
+            CPubKey pk;
+            ExtractPubKey(txout.scriptPubKey, pk);
+            out.push_back(Pair("pubkey", pk.GetHex()));
+            out.push_back(Pair("encoded_amount", txout.maskValue.amount.GetHex()));
+            out.push_back(Pair("encoded_mask", txout.maskValue.mask.GetHex()));
+            CPubKey txPubKey(txout.txPub);
+            out.push_back(Pair("txpubkey", txPubKey.GetHex()));
+            out.push_back(Pair("commitment", HexStr(txout.commitment.begin(), txout.commitment.end())));
+            vout.push_back(out);
+        }
+        entry.push_back(Pair("vout", vout));
+        txns.push_back(entry);
+    }
+    bInfo.push_back(Pair("transactions", txns));
+    return bInfo;
 }
 
 //for mobile wallet fast sync
@@ -434,32 +519,32 @@ UniValue createrawtransaction(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 2)
         throw runtime_error(
-                "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,...}\n"
-                "\nCreate a transaction spending the given inputs and sending to the given addresses.\n"
-                "Returns hex-encoded raw transaction.\n"
-                "Note that the transaction's inputs are not signed, and\n"
-                "it is not stored in the wallet or transmitted to the network.\n"
+            "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,...}\n"
+            "\nCreate a transaction spending the given inputs and sending to the given addresses.\n"
+            "Returns hex-encoded raw transaction.\n"
+            "Note that the transaction's inputs are not signed, and\n"
+            "it is not stored in the wallet or transmitted to the network.\n"
 
-                "\nArguments:\n"
-                "1. \"transactions\"        (string, required) A json array of json objects\n"
-                "     [\n"
-                "       {\n"
-                "         \"txid\":\"id\",  (string, required) The transaction id\n"
-                "         \"vout\":n        (numeric, required) The output number\n"
-                "       }\n"
-                "       ,...\n"
-                "     ]\n"
-                "2. \"addresses\"           (string, required) a json object with addresses as keys and amounts as values\n"
-                "    {\n"
-                "      \"address\": x.xxx   (numeric, required) The key is the pivx address, the value is the btc amount\n"
-                "      ,...\n"
-                "    }\n"
+            "\nArguments:\n"
+            "1. \"transactions\"        (string, required) A json array of json objects\n"
+            "     [\n"
+            "       {\n"
+            "         \"txid\":\"id\",  (string, required) The transaction id\n"
+            "         \"vout\":n        (numeric, required) The output number\n"
+            "       }\n"
+            "       ,...\n"
+            "     ]\n"
+            "2. \"addresses\"           (string, required) a json object with addresses as keys and amounts as values\n"
+            "    {\n"
+            "      \"address\": x.xxx   (numeric, required) The key is the pivx address, the value is the btc amount\n"
+            "      ,...\n"
+            "    }\n"
 
-                "\nResult:\n"
-                "\"transaction\"            (string) hex string of the transaction\n"
+            "\nResult:\n"
+            "\"transaction\"            (string) hex string of the transaction\n"
 
-                "\nExamples\n" +
-                HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"") + HelpExampleRpc("createrawtransaction", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"address\\\":0.01}\""));
+            "\nExamples\n" +
+            HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"") + HelpExampleRpc("createrawtransaction", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"address\\\":0.01}\""));
 
     LOCK(cs_main);
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VARR)(UniValue::VOBJ));
@@ -491,10 +576,10 @@ UniValue createrawtransaction(const UniValue& params, bool fHelp)
     for (const string& name_ : addrList) {
         CBitcoinAddress address(name_);
         if (!address.IsValid())
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid PIVX address: ")+name_);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid PIVX address: ") + name_);
 
         if (setAddress.count(address))
-            throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+name_);
+            throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ") + name_);
         setAddress.insert(address);
 
         CScript scriptPubKey = GetScriptForDestination(address.Get());
@@ -680,7 +765,7 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
             HelpExampleCli("signrawtransaction", "\"myhex\"") + HelpExampleRpc("signrawtransaction", "\"myhex\""));
 
 #ifdef ENABLE_WALLET
-        LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
 #else
     LOCK(cs_main);
 #endif
@@ -785,7 +870,7 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
             // if redeemScript given and not using the local wallet (private keys
             // given), add redeemScript to the tempKeystore so it can be signed:
             if (fGivenKeys && scriptPubKey.IsPayToScriptHash()) {
-                RPCTypeCheckObj(prevOut, boost::assign::map_list_of("txid", UniValue::VSTR)("vout", UniValue::VNUM)("scriptPubKey", UniValue::VSTR)("redeemScript",UniValue::VSTR));
+                RPCTypeCheckObj(prevOut, boost::assign::map_list_of("txid", UniValue::VSTR)("vout", UniValue::VNUM)("scriptPubKey", UniValue::VSTR)("redeemScript", UniValue::VSTR));
                 UniValue v = find_value(prevOut, "redeemScript");
                 if (!v.isNull()) {
                     vector<unsigned char> rsData(ParseHexV(v, "redeemScript"));
@@ -906,4 +991,3 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     return hashTx.GetHex();
 }
-

@@ -59,6 +59,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
         {"resyncfrom", 0},
         {"setdecoyconfirmation", 0},
         {"getrawtransactionbyblockheight", 0},
+        {"crawlrawtransactions", 0},
         {"move", 2},
         {"move", 3},
         {"sendfrom", 2},
