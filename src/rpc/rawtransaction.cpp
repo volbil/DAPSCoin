@@ -69,7 +69,7 @@ void PoSBlockInfoToJSON(const uint256 hashBlock, int64_t nTime, int height, UniV
 
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
 {
-    pwalletMain->IsTransactionForMe(tx);
+    //pwalletMain->IsTransactionForMe(tx);
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
     entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
@@ -97,6 +97,10 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
                 for (size_t i = 0; i < allDecoys.size(); i++) {
                     UniValue decoy(UniValue::VOBJ);
                     decoy.push_back(Pair("txid", allDecoys[i].hash.GetHex()));
+                    //if (allDecoys[i].hash.GetHex() == "0031b53b2620e5b45d4df12600b2185d1cbde9b3ca7e1f90f5747718af87a6c9") {
+                        CKeyImage ki;
+                        pwalletMain->generateKeyImage(pwalletMain->mapWallet[allDecoys[i].hash].vout[0].scriptPubKey, ki);
+                    //}
                     decoy.push_back(Pair("vout", (int64_t)allDecoys[i].n));
 #ifdef ENABLE_WALLET
                     LOCK(pwalletMain->cs_wallet);
@@ -212,7 +216,22 @@ UniValue crawlrawtransactions(const UniValue& params, bool fHelp)
     for (size_t i = 0; i < block.vtx.size(); i++) {
         UniValue entry(UniValue::VOBJ);
         const CTransaction& tx = block.vtx[i];
+        std::string txtype = "standard";
+        if (tx.IsCoinAudit()) {
+            txtype = "coinaudit";
+        } else if (tx.IsCoinBase()) {
+            txtype = "coinbase";
+        } else if (tx.IsCoinStake()) {
+            txtype = "coinstake";
+        } else {
+            txinouttype txinout;
+            if (!IsStandard(tx.vout[0].scriptPubKey, txinout)) {
+                txtype = "nonstandard";
+            }
+
+        }
         entry.push_back(Pair("txid", tx.GetHash().GetHex()));
+        entry.push_back(Pair("type", txtype));
         entry.push_back(Pair("version", tx.nVersion));
         entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
         entry.push_back(Pair("txfee", ValueFromAmount(tx.nTxFee)));
@@ -253,6 +272,7 @@ UniValue crawlrawtransactions(const UniValue& params, bool fHelp)
             CPubKey pk;
             ExtractPubKey(txout.scriptPubKey, pk);
             out.push_back(Pair("pubkey", pk.GetHex()));
+            out.push_back(Pair("amount", txout.nValue));
             out.push_back(Pair("encoded_amount", txout.maskValue.amount.GetHex()));
             out.push_back(Pair("encoded_mask", txout.maskValue.mask.GetHex()));
             CPubKey txPubKey(txout.txPub);
