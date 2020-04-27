@@ -164,6 +164,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
                 pBlind = blind.begin();
             }
             out.push_back(Pair("decoded_amount", ValueFromAmount(decodedAmount)));
+            out.push_back(Pair("decoded_mask", HexStr(blind.begin(), blind.end())));
             out.push_back(Pair("isMine", true));
         } else {
             out.push_back(Pair("isMine", false));
@@ -224,7 +225,7 @@ UniValue crawlrawtransactions(const UniValue& params, bool fHelp)
         } else if (tx.IsCoinStake()) {
             txtype = "coinstake";
         } else {
-            txinouttype txinout;
+            txnouttype txinout;
             if (!IsStandard(tx.vout[0].scriptPubKey, txinout)) {
                 txtype = "nonstandard";
             }
