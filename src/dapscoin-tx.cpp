@@ -42,7 +42,6 @@ using namespace std;
 static bool fCreateBlank;
 static bool fCreateBP;
 static map<string, UniValue> registers;
-CClientUIInterface uiInterface;
 
 static bool AppInitRawTx(int argc, char* argv[])
 {
@@ -62,8 +61,8 @@ static bool AppInitRawTx(int argc, char* argv[])
 
     if (argc < 2 || mapArgs.count("-?") || mapArgs.count("-help")) {
         // First part of help message is specific to this utility
-        std::string strUsage = _("Dapscoin Core dapscoin-tx utility version") + " " + FormatFullVersion() + "\n\n" +
-                               _("Usage:") + "\n" +
+        std::string strUsage = ("Dapscoin Core dapscoin-tx utility version") + " " + FormatFullVersion() + "\n\n" +
+                               ("Usage:") + "\n" +
                                "  dapscoin-tx [options] <hex-tx> [commands]  " + _("Update hex-encoded dapscoin transaction") + "\n" +
                                "  dapscoin-tx [options] -create [commands]   " + _("Create hex-encoded dapscoin transaction") + "\n" +
                                "\n";
@@ -71,13 +70,13 @@ static bool AppInitRawTx(int argc, char* argv[])
         fprintf(stdout, "%s", strUsage.c_str());
 
         strUsage = HelpMessageGroup(_("Options:"));
-        strUsage += HelpMessageOpt("-?", _("This help message"));
-        strUsage += HelpMessageOpt("-create", _("Create new, empty TX."));
-        strUsage += HelpMessageOpt("-json", _("Select JSON output"));
-        strUsage += HelpMessageOpt("-txid", _("Output only the hex-encoded transaction id of the resultant transaction."));
-        strUsage += HelpMessageOpt("-regtest", _("Enter regression test mode, which uses a special chain in which blocks can be solved instantly."));
-        strUsage += HelpMessageOpt("-testnet", _("Use the test network"));
-        strUsage += HelpMessageOpt("-signdaps", _("Sign a DAPS raw transaction"));
+        strUsage += HelpMessageOpt("-?", ("This help message"));
+        strUsage += HelpMessageOpt("-create", ("Create new, empty TX."));
+        strUsage += HelpMessageOpt("-json", ("Select JSON output"));
+        strUsage += HelpMessageOpt("-txid", ("Output only the hex-encoded transaction id of the resultant transaction."));
+        strUsage += HelpMessageOpt("-regtest", ("Enter regression test mode, which uses a special chain in which blocks can be solved instantly."));
+        strUsage += HelpMessageOpt("-testnet", ("Use the test network"));
+        strUsage += HelpMessageOpt("-signdaps", ("Sign a DAPS raw transaction"));
 
         fprintf(stdout, "%s", strUsage.c_str());
 
@@ -93,10 +92,10 @@ static bool AppInitRawTx(int argc, char* argv[])
         strUsage += HelpMessageOpt("outaddr=VALUE:ADDRESS", _("Add address-based output to TX"));
         strUsage += HelpMessageOpt("outscript=VALUE:SCRIPT", _("Add raw script output to TX"));
         strUsage += HelpMessageOpt("sign=SIGHASH-FLAGS", _("Add zero or more signatures to transaction") + ". " +
-            _("This command requires JSON registers:") +
-            _("prevtxs=JSON object") + ", " +
-            _("privatekeys=JSON object") + ". " +
-            _("See signrawtransaction docs for format of sighash flags, JSON objects."));
+            ("This command requires JSON registers:") +
+            ("prevtxs=JSON object") + ", " +
+            ("privatekeys=JSON object") + ". " +
+            ("See signrawtransaction docs for format of sighash flags, JSON objects."));
         fprintf(stdout, "%s", strUsage.c_str());
 
         strUsage = HelpMessageGroup(_("Register Commands:"));
