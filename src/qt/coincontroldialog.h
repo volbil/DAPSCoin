@@ -18,7 +18,6 @@
 
 class WalletModel;
 
-class MultisigDialog;
 class CCoinControl;
 class CTxMemPool;
 
@@ -63,6 +62,7 @@ private:
     int sortColumn;
     Qt::SortOrder sortOrder;
     bool fMultisigEnabled;
+    bool fSelectAllToggled{true};     // false when pushButtonSelectAll text is "Unselect All"
 
     QMenu* contextMenu;
     QTreeWidgetItem* contextMenuItem;
@@ -87,7 +87,7 @@ private:
 
     friend class CCoinControlWidgetItem;
 
-private slots:
+private Q_SLOTS:
     void showMenu(const QPoint&);
     void copyAmount();
     void copyLabel();

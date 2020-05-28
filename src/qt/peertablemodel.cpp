@@ -11,6 +11,8 @@
 #include "net.h"
 #include "sync.h"
 
+#include <algorithm>
+
 #include <QDebug>
 #include <QList>
 #include <QTimer>
@@ -58,9 +60,8 @@ public:
                 return;
             }
             cachedNodeStats.clear();
-#if QT_VERSION >= 0x040700
+
             cachedNodeStats.reserve(vNodes.size());
-#endif
             for (CNode* pnode : vNodes) {
                 CNodeCombinedStats stats;
                 stats.nodeStateStats.nMisbehavior = 0;
@@ -82,7 +83,7 @@ public:
 
         if (sortColumn >= 0)
             // sort cacheNodeStats (use stable sort to prevent rows jumping around unneceesarily)
-            qStableSort(cachedNodeStats.begin(), cachedNodeStats.end(), NodeLessThan(sortColumn, sortOrder));
+            std::stable_sort(cachedNodeStats.begin(), cachedNodeStats.end(), NodeLessThan(sortColumn, sortOrder));
 
         // build index map
         mapNodeRows.clear();
@@ -161,7 +162,8 @@ QVariant PeerTableModel::data(const QModelIndex& index, int role) const
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
         case Address:
-            return QString::fromStdString(rec->nodeStats.addrName);
+            // prepend to peer address down-arrow symbol for inbound connection and up-arrow for outbound connection
+            return QString(rec->nodeStats.fInbound ? "↓ " : "↑ ") + QString::fromStdString(rec->nodeStats.addrName);
         case Subversion:
             return QString::fromStdString(rec->nodeStats.cleanSubVer);
         case Ping:
@@ -213,9 +215,9 @@ const CNodeCombinedStats* PeerTableModel::getNodeStats(int idx)
 
 void PeerTableModel::refresh()
 {
-    emit layoutAboutToBeChanged();
+    Q_EMIT layoutAboutToBeChanged();
     priv->refreshPeers();
-    emit layoutChanged();
+    Q_EMIT layoutChanged();
 }
 
 int PeerTableModel::getRowByNodeId(NodeId nodeid)
