@@ -596,7 +596,7 @@ static int CommandLineRawTx(int argc, char* argv[])
                     }
                     int ret = secp256k1_bulletproof_rangeproof_prove(GetContext(), GetScratch(), GetGenerator(), proof, &len, values, NULL, blind_ptr, rpi.blinds.size()/32, &secp256k1_generator_const_h, 64, nonce, NULL, 0);
                     if (ret) {
-                        uint256 hashName = rpi.GetHash();
+                        uint256 hashName = Hash(txData.begin(), txData.end());
                         std::string outFileName = HexStr(hashName.begin(), hashName.end());
                         ofstream outfile;
                         outfile.open(outFileName + ".json");
