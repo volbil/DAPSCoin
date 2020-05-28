@@ -63,13 +63,13 @@ static bool AppInitRawTx(int argc, char* argv[])
         // First part of help message is specific to this utility
         std::string strUsage = ("Dapscoin Core dapscoin-tx utility version") + " " + FormatFullVersion() + "\n\n" +
                                ("Usage:") + "\n" +
-                               "  dapscoin-tx [options] <hex-tx> [commands]  " + _("Update hex-encoded dapscoin transaction") + "\n" +
-                               "  dapscoin-tx [options] -create [commands]   " + _("Create hex-encoded dapscoin transaction") + "\n" +
+                               "  dapscoin-tx [options] <hex-tx> [commands]  " + ("Update hex-encoded dapscoin transaction") + "\n" +
+                               "  dapscoin-tx [options] -create [commands]   " + ("Create hex-encoded dapscoin transaction") + "\n" +
                                "\n";
 
         fprintf(stdout, "%s", strUsage.c_str());
 
-        strUsage = HelpMessageGroup(_("Options:"));
+        strUsage = HelpMessageGroup(("Options:"));
         strUsage += HelpMessageOpt("-?", ("This help message"));
         strUsage += HelpMessageOpt("-create", ("Create new, empty TX."));
         strUsage += HelpMessageOpt("-json", ("Select JSON output"));
@@ -81,26 +81,26 @@ static bool AppInitRawTx(int argc, char* argv[])
         fprintf(stdout, "%s", strUsage.c_str());
 
 
-        strUsage = HelpMessageGroup(_("Commands:"));
-        strUsage += HelpMessageOpt("delin=N", _("Delete input N from TX"));
-        strUsage += HelpMessageOpt("viewkey=key", _("Private view key to sign DAPS transactions"));
-        strUsage += HelpMessageOpt("spendkey=key", _("Private view key to sign DAPS transactions"));
-        strUsage += HelpMessageOpt("delout=N", _("Delete output N from TX"));
-        strUsage += HelpMessageOpt("in=TXID:VOUT", _("Add input to TX"));
-        strUsage += HelpMessageOpt("locktime=N", _("Set TX lock time to N"));
-        strUsage += HelpMessageOpt("nversion=N", _("Set TX version to N"));
-        strUsage += HelpMessageOpt("outaddr=VALUE:ADDRESS", _("Add address-based output to TX"));
-        strUsage += HelpMessageOpt("outscript=VALUE:SCRIPT", _("Add raw script output to TX"));
-        strUsage += HelpMessageOpt("sign=SIGHASH-FLAGS", _("Add zero or more signatures to transaction") + ". " +
+        strUsage = HelpMessageGroup(("Commands:"));
+        strUsage += HelpMessageOpt("delin=N", ("Delete input N from TX"));
+        strUsage += HelpMessageOpt("viewkey=key", ("Private view key to sign DAPS transactions"));
+        strUsage += HelpMessageOpt("spendkey=key", ("Private view key to sign DAPS transactions"));
+        strUsage += HelpMessageOpt("delout=N", ("Delete output N from TX"));
+        strUsage += HelpMessageOpt("in=TXID:VOUT", ("Add input to TX"));
+        strUsage += HelpMessageOpt("locktime=N", ("Set TX lock time to N"));
+        strUsage += HelpMessageOpt("nversion=N", ("Set TX version to N"));
+        strUsage += HelpMessageOpt("outaddr=VALUE:ADDRESS", ("Add address-based output to TX"));
+        strUsage += HelpMessageOpt("outscript=VALUE:SCRIPT", ("Add raw script output to TX"));
+        strUsage += HelpMessageOpt("sign=SIGHASH-FLAGS", ("Add zero or more signatures to transaction") + ". " +
             ("This command requires JSON registers:") +
             ("prevtxs=JSON object") + ", " +
             ("privatekeys=JSON object") + ". " +
             ("See signrawtransaction docs for format of sighash flags, JSON objects."));
         fprintf(stdout, "%s", strUsage.c_str());
 
-        strUsage = HelpMessageGroup(_("Register Commands:"));
-        strUsage += HelpMessageOpt("load=NAME:FILENAME", _("Load JSON file FILENAME into register NAME"));
-        strUsage += HelpMessageOpt("set=NAME:JSON-STRING", _("Set register NAME to given JSON-STRING"));
+        strUsage = HelpMessageGroup(("Register Commands:"));
+        strUsage += HelpMessageOpt("load=NAME:FILENAME", ("Load JSON file FILENAME into register NAME"));
+        strUsage += HelpMessageOpt("set=NAME:JSON-STRING", ("Set register NAME to given JSON-STRING"));
         fprintf(stdout, "%s", strUsage.c_str());
 
         return false;
