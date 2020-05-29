@@ -97,10 +97,6 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
                 for (size_t i = 0; i < allDecoys.size(); i++) {
                     UniValue decoy(UniValue::VOBJ);
                     decoy.push_back(Pair("txid", allDecoys[i].hash.GetHex()));
-                    //if (allDecoys[i].hash.GetHex() == "0031b53b2620e5b45d4df12600b2185d1cbde9b3ca7e1f90f5747718af87a6c9") {
-                        CKeyImage ki;
-                        pwalletMain->generateKeyImage(pwalletMain->mapWallet[allDecoys[i].hash].vout[0].scriptPubKey, ki);
-                    //}
                     decoy.push_back(Pair("vout", (int64_t)allDecoys[i].n));
 #ifdef ENABLE_WALLET
                     LOCK(pwalletMain->cs_wallet);
