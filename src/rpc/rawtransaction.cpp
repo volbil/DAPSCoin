@@ -982,7 +982,6 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
             "\nAs a json rpc call\n" + HelpExampleRpc("sendrawtransaction", "\"signedhex\""));
 
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL));
-
     // parse hex string from parameter
     CTransaction tx;
     if (!DecodeHexTx(tx, params[0].get_str()))
@@ -993,7 +992,7 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
     if (params.size() > 1)
         fOverrideFees = params[1].get_bool();
 
-    AssertLockNotHeld(cs_main);
+    LOCK(cs_main);
     CCoinsViewCache& view = *pcoinsTip;
     const CCoins* existingCoins = view.AccessCoins(hashTx);
     bool fHaveMempool = mempool.exists(hashTx);
