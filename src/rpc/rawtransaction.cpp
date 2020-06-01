@@ -1013,3 +1013,46 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     return hashTx.GetHex();
 }
+
+UniValue broadcastrawtransaction(const UniValue& params, bool fHelp)
+{
+    UniValue ret(UniValue::VOBJ);
+    if (fHelp || params.size() < 1 || params.size() > 2) {
+        ret.push_back(Pair("result", false));
+        ret.push_back(Pair("reason", "invalid-input"));
+        return ret;
+    } 
+
+    RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL));
+    // parse hex string from parameter
+    CTransaction tx;
+    if (!DecodeHexTx(tx, params[0].get_str())) {
+        ret.push_back(Pair("result", false));
+        ret.push_back(Pair("reason", "invalid-hex-input"));
+        return ret;
+    }
+    uint256 hashTx = tx.GetHash();
+
+    LOCK(cs_main);
+    CCoinsViewCache& view = *pcoinsTip;
+    const CCoins* existingCoins = view.AccessCoins(hashTx);
+    bool fHaveMempool = mempool.exists(hashTx);
+    bool fHaveChain = existingCoins && existingCoins->nHeight < 1000000000;
+    if (!fHaveMempool && !fHaveChain) {
+        // push to local node and sync with wallets
+        CValidationState state;
+        if (!AcceptToMemoryPool(mempool, state, tx, false, NULL, true)) {
+            ret.push_back(Pair("result", false));
+            ret.push_back(Pair("reason",  state.GetRejectReason()));
+            return ret;
+        }
+    } else if (fHaveChain) {
+        ret.push_back(Pair("result", false));
+        ret.push_back(Pair("reason", "duplicate-tx"));
+        return ret;
+    }
+    RelayTransaction(tx);
+    ret.push_back(Pair("result", true));
+    ret.push_back(Pair("txid",  hashTx.GetHex()));
+    return ret;
+}

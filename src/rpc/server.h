@@ -279,6 +279,7 @@ extern UniValue decoderawtransaction(const UniValue& params, bool fHelp);
 extern UniValue decodescript(const UniValue& params, bool fHelp);
 extern UniValue signrawtransaction(const UniValue& params, bool fHelp);
 extern UniValue sendrawtransaction(const UniValue& params, bool fHelp);
+extern UniValue broadcastrawtransaction(const UniValue& params, bool fHelp);
 
 extern UniValue getblockcount(const UniValue& params, bool fHelp); // in rpc/blockchain.cpp
 extern UniValue getbestblockhash(const UniValue& params, bool fHelp);
