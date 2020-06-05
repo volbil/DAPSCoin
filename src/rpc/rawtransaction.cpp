@@ -1034,10 +1034,18 @@ UniValue broadcastrawtransaction(const UniValue& params, bool fHelp)
     uint256 hashTx = tx.GetHash();
 
     LOCK(cs_main);
-    CCoinsViewCache& view = *pcoinsTip;
-    const CCoins* existingCoins = view.AccessCoins(hashTx);
+    CTransaction txFound;
+    uint256 hashBlock = 0;
+    bool fHaveChain = false;
+    if (GetTransaction(hashTx, txFound, hashBlock, true)) {
+        BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
+        if (mi != mapBlockIndex.end() && (*mi).second) {
+            CBlockIndex* pindex = (*mi).second;
+            fHaveChain = chainActive.Contains(pindex);
+        }
+    }  
+
     bool fHaveMempool = mempool.exists(hashTx);
-    bool fHaveChain = existingCoins && existingCoins->nHeight < 1000000000;
     if (!fHaveMempool && !fHaveChain) {
         // push to local node and sync with wallets
         CValidationState state;
