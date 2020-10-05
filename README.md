@@ -24,7 +24,7 @@ The team consists of a total of 20 members located worldwide.
 
 ## How we Compare to Other Privacy Projects
 
-![Privacy Coin Chart](https://officialdapscoin.com/wp-content/uploads/2020/01/DAPS-Privacy-coin-chart-2020.jpg)
+![Privacy Coin Chart](https://officialdapscoin.com/daps-coin-comparison-chart-2020/)
 
 ## How to Contribute to DAPS
 

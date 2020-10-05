@@ -1587,19 +1587,6 @@ bool CheckHaveInputs(const CCoinsViewCache& view, const CTransaction& tx)
                     return false;
                 }
 
-                //TODO-NOTE: 07/06/2019 Remove this condition as colateral will be cheated as a normal tx
-                //UTXO with 1M DAPS can only be consumed in a transaction with that single UTXO
-                /*if (decoysSize > 1 && prev.vout[alldecoys[j].n].nValue == 1000000 * COIN) {
-                    return false;
-                }
-
-                if (prev.vout[alldecoys[j].n].nValue == 1000000 * COIN) {
-                    if (!VerifyKeyImages(tx)) {
-                        LogPrintf("Failed to verify correctness of key image of collateralization spend\n");
-                        return false;
-                    }
-                }*/
-
                 if (mapBlockIndex.count(bh) < 1) return false;
                 if (prev.IsCoinStake() || prev.IsCoinAudit() || prev.IsCoinBase()) {
                     if (nSpendHeight - mapBlockIndex[bh]->nHeight < Params().COINBASE_MATURITY()) return false;
@@ -1619,6 +1606,15 @@ bool CheckHaveInputs(const CCoinsViewCache& view, const CTransaction& tx)
                     if (ancestor != atTheblock) {
                         LogPrintf("Decoy for transactions %s not in the same chain with block %s\n", alldecoys[j].hash.GetHex(), tip->GetBlockHash().GetHex());
                         return false;
+                    }
+
+                    if (atTheblock->IsProofOfAudit() && chainActive.Height() >= Params().HardFork()) {
+                        CBlock b;
+                        ReadBlockFromDisk(b, atTheblock);
+                        if (!CheckPoABlockRewardAmount(b, atTheblock)) {
+                            LogPrintf("Reject poa transaction %s\n");
+                            return false;
+                        }
                     }
                 }
             }
@@ -1716,7 +1712,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
 
         // Check for non-standard pay-to-script-hash in inputs
         if (Params().RequireStandard() && !AreInputsStandard(tx, view))
-            return error("AcceptToMemoryPool: : nonstandard transaction input");
+            return error("AcceptToMemoryPool: nonstandard transaction input");
         // Check that the transaction doesn't have an excessive number of
         // sigops, making it impossible to mine. Since the coinbase transaction
         // itself can contain sigops MAX_TX_SIGOPS is less than
@@ -1776,7 +1772,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
 
         if (!CheckInputs(tx, state, view, true, STANDARD_SCRIPT_VERIFY_FLAGS, true)) {
-            return error("AcceptToMemoryPool: : ConnectInputs failed %s", hash.ToString());
+            return error("AcceptToMemoryPool: ConnectInputs failed %s", hash.ToString());
         }
         // Check again against just the consensus-critical mandatory script
         // verification flags, in case of bugs in the standard flags that cause
@@ -1789,7 +1785,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState& state, const CTransa
         // can be exploited as a DoS attack.
         if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true)) {
             return error(
-                "AcceptToMemoryPool: : BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s",
+                "AcceptToMemoryPool: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s",
                 hash.ToString());
         }
         // Store transaction in memory
@@ -1830,11 +1826,11 @@ bool AcceptableInputs(CTxMemPool& pool, CValidationState& state, const CTransact
     const int chainHeight = chainActive.Height();
 
     if (!CheckTransaction(tx, false, true, state))
-        return error("AcceptableInputs: : CheckTransaction failed");
+        return error("AcceptableInputs: CheckTransaction failed");
 
     // Coinbase is only valid in a block, not as a loose transaction
     if (tx.IsCoinBase())
-        return state.DoS(100, error("AcceptableInputs: : coinbase as individual tx"),
+        return state.DoS(100, error("AcceptableInputs: coinbase as individual tx"),
             REJECT_INVALID, "coinbase");
 
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
@@ -1979,14 +1975,14 @@ bool AcceptableInputs(CTxMemPool& pool, CValidationState& state, const CTransact
         }
 
         if (fRejectInsaneFee && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
-            return error("AcceptableInputs: : insane fees %s, %d > %d",
+            return error("AcceptableInputs: insane fees %s, %d > %d",
                 hash.ToString(),
                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
 
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
         if (!CheckInputs(tx, state, view, false, STANDARD_SCRIPT_VERIFY_FLAGS, true)) {
-            return error("AcceptableInputs: : ConnectInputs failed %s", hash.ToString());
+            return error("AcceptableInputs: ConnectInputs failed %s", hash.ToString());
         }
 
         // Check again against just the consensus-critical mandatory script
@@ -2925,12 +2921,19 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
             return state.DoS(100, error("ConnectBlock(): PoA block should contain only non-audited recent PoS blocks"));
         }
 
-        if (!CheckNumberOfAuditedPoSBlocks(block)) {
-            return state.DoS(100, error("ConnectBlock(): A PoA block should audit at least 59 PoS blocks"));
+        if (!CheckNumberOfAuditedPoSBlocks(block, pindex)) {
+            return state.DoS(100, error("ConnectBlock(): A PoA block should audit at least 59 PoS blocks and no more than 120 PoS blocks"));
         }
 
         if (!CheckPoABlockNotContainingPoABlockInfo(block)) {
             return state.DoS(100, error("ConnectBlock(): A PoA block should not audit any existing PoA blocks"));
+        }
+
+        if (!CheckPoABlockRewardAmount(block, pindex)) {
+            return state.DoS(100, error("ConnectBlock(): This PoA block reward does not match the value it should"));
+        }
+        if (block.GetBlockTime() >= GetAdjustedTime() + 2 * 60 * 60) {
+            return state.DoS(100, error("ConnectBlock(): A PoA block should not be in the future"));
         }
     }
 
@@ -4391,6 +4394,41 @@ bool AcceptBlock(CBlock& block, CValidationState& state, CBlockIndex** ppindex, 
 
     int nHeight = pindex->nHeight;
 
+    if (pindex->nHeight >= Params().HardFork()) {
+            for(size_t i = 0; i < block.vtx.size(); i++) {
+                const CTransaction& tx = block.vtx[i];
+                for (unsigned int i = 0; i < tx.vin.size(); i++) {
+                    if (tx.IsCoinBase()) continue;
+                    //check output and decoys
+                    std::vector<COutPoint> alldecoys = tx.vin[i].decoys;
+
+                    alldecoys.push_back(tx.vin[i].prevout);
+                    for (size_t j = 0; j < alldecoys.size(); j++) {
+                        CTransaction prev;
+                        uint256 bh;
+                        if (!GetTransaction(alldecoys[j].hash, prev, bh, true)) {
+                            return false;
+                        }
+
+                        if (mapBlockIndex.count(bh) < 1) return false;
+                        CBlockIndex* atTheblock = mapBlockIndex[bh];
+                        if (!atTheblock) {
+                            //LogPrintf("Decoy for transactions %s not in the same chain with block %s\n", alldecoys[j].hash.GetHex(), tip->GetBlockHash().GetHex());
+                            return false;
+                        } else {
+                            CBlock bhBlock;
+                            ReadBlockFromDisk(bhBlock, atTheblock);
+                            if (atTheblock->IsProofOfAudit()) {
+                                if (prev.vout[alldecoys[j].n].nValue > 50000 * COIN || prev.vout[alldecoys[j].n].nValue != bhBlock.posBlocksAudited.size() * 100 * COIN) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     // Write block to history file
     try {
         unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
@@ -4617,22 +4655,23 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, CBlock* pblock, CDis
                         coinbaseIdx = 1;
                     }
                     CTransaction& coinbase = b.vtx[coinbaseIdx];
-
-                    for (int i = 0; i < (int)coinbase.vout.size(); i++) {
-                        if (!coinbase.vout[i].IsNull() && !coinbase.vout[i].commitment.empty() && coinbase.vout[i].nValue > 0 && !coinbase.vout[i].IsEmpty()) {
-                            if ((secp256k1_rand32() % 100) <= CWallet::PROBABILITY_NEW_COIN_SELECTED) {
-                                COutPoint newOutPoint(coinbase.GetHash(), i);
-                                if (pwalletMain->coinbaseDecoysPool.count(newOutPoint) == 1) {
-                                    continue;
-                                }
-                                //add new coinbase transaction to the pool
-                                if ((int)pwalletMain->coinbaseDecoysPool.size() >= CWallet::MAX_DECOY_POOL) {
-                                    int selected = secp256k1_rand32() % CWallet::MAX_DECOY_POOL;
-                                    map<COutPoint, uint256>::const_iterator it = std::next(pwalletMain->coinbaseDecoysPool.begin(), selected);
-                                    pwalletMain->coinbaseDecoysPool.erase(it->first);
-                                    pwalletMain->coinbaseDecoysPool[newOutPoint] = pblock->GetHash();
-                                } else {
-                                    pwalletMain->coinbaseDecoysPool[newOutPoint] = pblock->GetHash();
+                    if (b.posBlocksAudited.size() == 0) {
+                        for (int i = 0; i < (int)coinbase.vout.size(); i++) {
+                            if (!coinbase.vout[i].IsNull() && !coinbase.vout[i].commitment.empty() && coinbase.vout[i].nValue > 0 && !coinbase.vout[i].IsEmpty()) {
+                                if ((secp256k1_rand32() % 100) <= CWallet::PROBABILITY_NEW_COIN_SELECTED) {
+                                    COutPoint newOutPoint(coinbase.GetHash(), i);
+                                    if (pwalletMain->coinbaseDecoysPool.count(newOutPoint) == 1) {
+                                        continue;
+                                    }
+                                    //add new coinbase transaction to the pool
+                                    if ((int)pwalletMain->coinbaseDecoysPool.size() >= CWallet::MAX_DECOY_POOL) {
+                                        int selected = secp256k1_rand32() % CWallet::MAX_DECOY_POOL;
+                                        map<COutPoint, uint256>::const_iterator it = std::next(pwalletMain->coinbaseDecoysPool.begin(), selected);
+                                        pwalletMain->coinbaseDecoysPool.erase(it->first);
+                                        pwalletMain->coinbaseDecoysPool[newOutPoint] = pblock->GetHash();
+                                    } else {
+                                        pwalletMain->coinbaseDecoysPool[newOutPoint] = pblock->GetHash();
+                                    }
                                 }
                             }
                         }
@@ -5654,7 +5693,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             vRecv >> LIMITED_STRING(pfrom->strSubVer, MAX_SUBVERSION_LENGTH);
             pfrom->cleanSubVer = SanitizeString(pfrom->strSubVer);
         }
-        if (pfrom->strSubVer == "/DAPScoin:0.27.5.1/" || pfrom->strSubVer == "/DAPScoin:1.0.0/" || pfrom->strSubVer == "/DAPScoin:1.0.1/" || pfrom->strSubVer == "/DAPS:1.0.1.3/" || pfrom->strSubVer == "/DAPS:1.0.2/" || pfrom->strSubVer == "/DAPS:1.0.3.4/" || pfrom->strSubVer == "/DAPS:1.0.4.6/") {
+        if (pfrom->strSubVer == "/DAPScoin:0.27.5.1/" || pfrom->strSubVer == "/DAPScoin:1.0.0/" || pfrom->strSubVer == "/DAPScoin:1.0.1/" || pfrom->strSubVer == "/DAPS:1.0.1.3/" || pfrom->strSubVer == "/DAPS:1.0.2/" || pfrom->strSubVer == "/DAPS:1.0.3.4/" || pfrom->strSubVer == "/DAPS:1.0.4.6/" || pfrom->strSubVer == "/DAPS:1.0.5.7/" || pfrom->strSubVer == "/DAPS:1.0.5.8/") {
                 // disconnect from peers other than these sub versions
                 LogPrintf("partner %s using obsolete version %s; banning and disconnecting\n", pfrom->addr.ToString().c_str(), pfrom->strSubVer.c_str());
                 state->fShouldBan = true;
