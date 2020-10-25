@@ -1,3 +1,7 @@
+// Copyright (c) 2017-2018 The PIVX developers
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "multisenddialog.h"
 #include "ui_multisenddialog.h"
 
@@ -11,10 +15,9 @@
 
 MultiSendDialog::MultiSendDialog(QWidget* parent) : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
                                                     ui(new Ui::MultiSendDialog),
-                                                    model(0)
+                                                    model(nullptr)
 {
     ui->setupUi(this);
-
     updateCheckBoxes();
 }
 
@@ -53,7 +56,7 @@ void MultiSendDialog::on_addressBookButton_clicked()
         if (dlg.exec())
             setAddress(dlg.getReturnValue(), ui->multiSendAddressEdit);
 
-        //Update the label text box with the label in the addressbook
+        // Update the label text box with the label in the addressbook
         QString associatedLabel = model->getAddressTableModel()->labelForAddress(dlg.getReturnValue());
         if (!associatedLabel.isEmpty())
             ui->labelAddressLabelEdit->setText(associatedLabel);
