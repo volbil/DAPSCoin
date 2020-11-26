@@ -85,9 +85,12 @@ BITCOIN_CORE_H = \
   allocators.h \
   amount.h \
   base58.h \
+  bignum.h \
   bip38.h \
   bip39.h \
   bip39_english.h \
+  ecdhutil.h \
+  enum.h \
   hdchain.h \
   bloom.h \
   chain.h \
@@ -115,6 +118,7 @@ BITCOIN_CORE_H = \
   httprpc.h \
   httpserver.h \
   init.h \
+  invalid.h \
   kernel.h \
   swifttx.h \
   key.h \
@@ -130,6 +134,7 @@ BITCOIN_CORE_H = \
   masternodeconfig.h \
   merkleblock.h \
   miner.h \
+  mintpool.h \
   mruset.h \
   netbase.h \
   net.h \
@@ -151,6 +156,7 @@ BITCOIN_CORE_H = \
   script/standard.h \
   script/script_error.h \
   serialize.h \
+  stakeinput.h \
   streams.h \
   sync.h \
   threadsafety.h \
@@ -161,6 +167,7 @@ BITCOIN_CORE_H = \
   txmempool.h \
   guiinterface.h \
   uint256.h \
+  uint512.h \
   undo.h \
   util.h \
   util/macros.h \
@@ -199,6 +206,7 @@ libbitcoin_server_a_SOURCES = \
   main.cpp \
   merkleblock.cpp \
   miner.cpp \
+  mintpool.cpp \
   net.cpp \
   noui.cpp \
   poa.cpp \
@@ -331,6 +339,7 @@ libbitcoin_common_a_SOURCES = \
   protocol.cpp \
   pubkey.cpp \
   scheduler.cpp \
+  stakeinput.cpp \
   script/interpreter.cpp \
   script/script.cpp \
   script/sign.cpp \
