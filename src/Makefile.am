@@ -244,8 +244,17 @@ libbitcoin_zxcvbn_a_SOURCES = \
   zxcvbn/scoring.cpp \
   zxcvbn/time_estimates.cpp \
   zxcvbn/util.cpp \
-  zxcvbn/zxcvbn.cpp
-
+  zxcvbn/zxcvbn.cpp \
+  zxcvbn/adjacency_graphs.hpp \
+  zxcvbn/feedback.hpp \
+  zxcvbn/frequency_lists.hpp \
+  zxcvbn/matching.hpp \
+  zxcvbn/optional.hpp \
+  zxcvbn/scoring.hpp \
+  zxcvbn/time_estimates.hpp \
+  zxcvbn/util.hpp \
+  zxcvbn/zxcvbn.hpp \
+  zxcvbn/zxcvbn.h
 
 # wallet: shared between dapscoind and dapscoin-qt, but only linked
 # when wallet enabled
