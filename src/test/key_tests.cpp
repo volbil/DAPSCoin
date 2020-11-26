@@ -9,6 +9,7 @@
 #include "uint256.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "test_dapscoin.h"
 
 #include <string>
 #include <vector>
@@ -59,7 +60,7 @@ void dumpKeyInfo(uint256 privkey)
 
 
 #ifdef DISABLE_PASSED_TEST
-BOOST_AUTO_TEST_SUITE(key_tests)
+BOOST_FIXTURE_TEST_SUITE(key_tests, TestingSetup)
 
 BOOST_AUTO_TEST_CASE(key_test1)
 {

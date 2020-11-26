@@ -4,6 +4,8 @@
 
 #define BOOST_TEST_MODULE Dapscoin Test Suite
 
+#include "test_dapscoin.h"
+
 #include "main.h"
 #include "random.h"
 #include "txdb.h"
@@ -14,9 +16,7 @@
 #include "wallet/wallet.h"
 #endif
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
-#include <boost/thread.hpp>
 
 extern CClientUIInterface uiInterface;
 extern CWallet* pwalletMain;
@@ -24,12 +24,8 @@ extern CWallet* pwalletMain;
 extern bool fPrintToConsole;
 extern void noui_connect();
 
-struct TestingSetup {
-    CCoinsViewDB *pcoinsdbview;
-    boost::filesystem::path pathTemp;
-    boost::thread_group threadGroup;
-
-    TestingSetup() {
+TestingSetup::TestingSetup()
+{
         SetupEnvironment();
         fPrintToDebugLog = true; // don't want to write to debug.log file
         fCheckBlockIndex = false;
@@ -38,6 +34,7 @@ struct TestingSetup {
 #ifdef ENABLE_WALLET
         bitdb.MakeMock();
 #endif
+        ClearDatadirCache();
         // pathTemp = GetTempPath() / strprintf("test_dapscoin_%lu_%i", (unsigned long)GetTime(), (int)(GetRand(100000)));
         pathTemp = GetTempPath() / "test_dapscoin";
         boost::filesystem::create_directories(pathTemp);
@@ -104,27 +101,28 @@ struct TestingSetup {
         for (int i=0; i < nScriptCheckThreads-1; i++)
             threadGroup.create_thread(&ThreadScriptCheck);
         RegisterNodeSignals(GetNodeSignals());
-    }
-    ~TestingSetup()
-    {
+}
+
+TestingSetup::~TestingSetup()
+{
+        UnregisterNodeSignals(GetNodeSignals());
         threadGroup.interrupt_all();
         threadGroup.join_all();
-        UnregisterNodeSignals(GetNodeSignals());
 #ifdef ENABLE_WALLET
+        UnregisterValidationInterface(pwalletMain);
         delete pwalletMain;
         pwalletMain = NULL;
 #endif
+        UnloadBlockIndex();
         delete pcoinsTip;
         delete pcoinsdbview;
         delete pblocktree;
 #ifdef ENABLE_WALLET
         bitdb.Flush(true);
+        bitdb.Reset();
 #endif
         boost::filesystem::remove_all(pathTemp);
-    }
-};
-
-BOOST_GLOBAL_FIXTURE(TestingSetup);
+}
 
 // void Shutdown(void* parg)
 // {

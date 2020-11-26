@@ -8,6 +8,7 @@
 #include "script/script.h"
 #include "script/script_error.h"
 #include "script/sign.h"
+#include "test_dapscoin.h"
 
 #ifdef ENABLE_WALLET
 #include "wallet/wallet_ismine.h"
@@ -48,7 +49,7 @@ Verify(const CScript& scriptSig, const CScript& scriptPubKey, bool fStrict, Scri
 }
 
 
-BOOST_AUTO_TEST_SUITE(script_P2SH_tests)
+BOOST_FIXTURE_TEST_SUITE(script_P2SH_tests, TestingSetup)
 
 BOOST_AUTO_TEST_CASE(sign)
 {
