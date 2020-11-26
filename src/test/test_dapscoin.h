@@ -10,7 +10,7 @@ struct TestingSetup {
     CCoinsViewDB *pcoinsdbview;
     boost::filesystem::path pathTemp;
     boost::thread_group threadGroup;
-    ECCVerifyHandle globalVerifyHandle;
+    //ECCVerifyHandle globalVerifyHandle;
 
     TestingSetup();
     ~TestingSetup();
