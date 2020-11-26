@@ -134,7 +134,6 @@ BITCOIN_CORE_H = \
   masternodeconfig.h \
   merkleblock.h \
   miner.h \
-  mintpool.h \
   mruset.h \
   netbase.h \
   net.h \
@@ -206,7 +205,6 @@ libbitcoin_server_a_SOURCES = \
   main.cpp \
   merkleblock.cpp \
   miner.cpp \
-  mintpool.cpp \
   net.cpp \
   noui.cpp \
   poa.cpp \
