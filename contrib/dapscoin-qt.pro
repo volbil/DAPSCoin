@@ -111,7 +111,6 @@ HEADERS += src/activemasternode.h \
            src/masternodeman.h \
            src/merkleblock.h \
            src/miner.h \
-           src/mintpool.h \
            src/mruset.h \
            src/net.h \
            src/netbase.h \
@@ -126,7 +125,6 @@ HEADERS += src/activemasternode.h \
            src/reverse_iterate.h \
            src/scheduler.h \
            src/serialize.h \
-           src/stakeinput.h \
            src/streams.h \
            src/swifttx.h \
            src/sync.h \
@@ -441,7 +439,6 @@ SOURCES += src/activemasternode.cpp \
            src/masternodeman.cpp \
            src/merkleblock.cpp \
            src/miner.cpp \
-           src/mintpool.cpp \
            src/net.cpp \
            src/netbase.cpp \
            src/noui.cpp \
@@ -453,7 +450,6 @@ SOURCES += src/activemasternode.cpp \
            src/random.cpp \
            src/rest.cpp \
            src/scheduler.cpp \
-           src/stakeinput.cpp \
            src/swifttx.cpp \
            src/sync.cpp \
            src/timedata.cpp \

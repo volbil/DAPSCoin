@@ -155,7 +155,6 @@ BITCOIN_CORE_H = \
   script/standard.h \
   script/script_error.h \
   serialize.h \
-  stakeinput.h \
   streams.h \
   sync.h \
   threadsafety.h \
@@ -337,7 +336,6 @@ libbitcoin_common_a_SOURCES = \
   protocol.cpp \
   pubkey.cpp \
   scheduler.cpp \
-  stakeinput.cpp \
   script/interpreter.cpp \
   script/script.cpp \
   script/sign.cpp \
