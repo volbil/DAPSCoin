@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       ARTIFACT_DIR: source
+      EXTRA_FLAGS: "--disable-jni --disable-tests --disable-gui-tests --disable-bench"
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -71,7 +72,7 @@ jobs:
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Build DAPS 
       run: |
-        ./configure --disable-jni --enable-tests --with-comparison-tool=no --prefix=$(realpath depends/x86_64-pc-linux-gnu)
+        ./configure $EXTRA_FLAGS --prefix=$(realpath depends/x86_64-pc-linux-gnu)
         make -j$(nproc)
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Prepare Files for Artifact
@@ -113,7 +114,7 @@ jobs:
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Build DAPS
       run: |
-        ./configure --disable-jni --prefix=$(realpath depends/x86_64-w64-mingw32)
+        ./configure $EXTRA_FLAGS --prefix=$(realpath depends/x86_64-w64-mingw32)
         make -j$(nproc)
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Prepare Files for Artifact
@@ -158,7 +159,7 @@ jobs:
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Build DAPS
       run: |
-        ./configure --disable-jni --prefix=$(realpath depends/x86_64-apple-darwin16)
+        ./configure $EXTRA_FLAGS --prefix=$(realpath depends/x86_64-apple-darwin16)
         make -j$(nproc)
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Prepare Files for Artifact
@@ -195,7 +196,7 @@ jobs:
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Build DAPS
       run: |
-        ./configure --disable-jni --prefix=$(realpath depends/aarch64-linux-gnu)
+        ./configure $EXTRA_FLAGS --prefix=$(realpath depends/aarch64-linux-gnu)
         make -j$(nproc)
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Prepare Files for Artifact
@@ -232,7 +233,7 @@ jobs:
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Build DAPS
       run: |
-        ./configure --disable-jni --prefix=$(realpath depends/arm-linux-gnueabihf) --enable-glibc-back-compat --enable-reduce-exports LDFLAGS=-static-libstdc++
+        ./configure $EXTRA_FLAGS --prefix=$(realpath depends/arm-linux-gnueabihf) --enable-glibc-back-compat --enable-reduce-exports LDFLAGS=-static-libstdc++
         make -j$(nproc)
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Prepare Files for Artifact
@@ -265,7 +266,7 @@ jobs:
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Build DAPS
       run: |
-        ./configure --disable-jni --prefix=$(realpath depends/i686-pc-linux-gnu)
+        ./configure $EXTRA_FLAGS --prefix=$(realpath depends/i686-pc-linux-gnu)
         make -j$(nproc)
       working-directory: ${{ env.SOURCE_ARTIFACT }}
     - name: Prepare Files for Artifact
