@@ -246,7 +246,10 @@ libbitcoin_zxcvbn_a_SOURCES = \
   zxcvbn/util.cpp \
   zxcvbn/zxcvbn.cpp \
   zxcvbn/adjacency_graphs.hpp \
+  zxcvbn/common.hpp \
   zxcvbn/feedback.hpp \
+  zxcvbn/frequency_lists_common.hpp \
+  zxcvbn/_frequency_lists.hpp \
   zxcvbn/frequency_lists.hpp \
   zxcvbn/matching.hpp \
   zxcvbn/optional.hpp \
