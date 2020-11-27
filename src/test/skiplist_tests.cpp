@@ -1,10 +1,12 @@
 // Copyright (c) 2014 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "main.h"
 #include "random.h"
 #include "util.h"
+#include "test/test_dapscoin.h"
 
 #include <vector>
 
@@ -12,8 +14,7 @@
 
 #define SKIPLIST_LENGTH 300000
 
-#ifdef DISABLE_PASSED_TEST
-BOOST_AUTO_TEST_SUITE(skiplist_tests)
+BOOST_FIXTURE_TEST_SUITE(skiplist_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(skiplist_test)
 {
@@ -101,4 +102,3 @@ BOOST_AUTO_TEST_CASE(getlocator_test)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

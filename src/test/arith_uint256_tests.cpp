@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2013 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,7 +15,6 @@
 #include "version.h"
 #include "test/test_dapscoin.h"
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(arith_uint256_tests, BasicTestingSetup)
 
 /// Convert vector to arith_uint256, via uint256 blob
@@ -566,4 +566,3 @@ BOOST_AUTO_TEST_CASE( getmaxcoverage ) // some more tests just to get 100% cover
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

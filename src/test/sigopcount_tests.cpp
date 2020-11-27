@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2013 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,14 +17,13 @@
 using namespace std;
 
 // Helpers:
-/*static std::vector<unsigned char>
+static std::vector<unsigned char>
 Serialize(const CScript& s)
 {
     std::vector<unsigned char> sSerialized(s);
     return sSerialized;
-}*/
+}
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(sigopcount_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(GetSigOpCount)
@@ -65,4 +65,3 @@ BOOST_AUTO_TEST_CASE(GetSigOpCount)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

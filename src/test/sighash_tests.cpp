@@ -1,4 +1,5 @@
 // Copyright (c) 2013 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,11 +16,10 @@
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
+
 #include <univalue.h>
 
 extern UniValue read_json(const std::string& jsondata);
-
-#ifdef DISABLE_FAILED_TEST
 
 // Old script.cpp SignatureHash function
 uint256 static SignatureHashOld(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType)
@@ -170,7 +170,6 @@ BOOST_AUTO_TEST_CASE(sighash_from_data)
     for (unsigned int idx = 0; idx < tests.size(); idx++) {
         UniValue test = tests[idx];
         std::string strTest = test.write();
-
         if (test.size() < 1) // Allow for extra stuff (useful for comments)
         {
             BOOST_ERROR("Bad test: " << strTest);
@@ -212,4 +211,3 @@ BOOST_AUTO_TEST_CASE(sighash_from_data)
     }
 }
 BOOST_AUTO_TEST_SUITE_END()
-#endif

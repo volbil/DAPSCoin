@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2014 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,7 +11,6 @@
 #include <limits.h>
 #include <stdint.h>
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(scriptnum_tests, BasicTestingSetup)
 
 static const long values[] = \
@@ -198,4 +198,3 @@ BOOST_AUTO_TEST_CASE(operators)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

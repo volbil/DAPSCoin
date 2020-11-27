@@ -18,7 +18,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#ifdef DISABLE_FAILED_TEST
 using namespace std;
 
 // Helpers:
@@ -377,4 +376,3 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

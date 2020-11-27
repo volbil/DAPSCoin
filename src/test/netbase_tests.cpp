@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2014 The Bitcoin Core developers
 // Copyright (c) 2014-2015 The Dash Core developers
 // Copyright (c) 2015-2018 The PIVX developers
-// Copyright (c) 2018-2020 The DAPS Project developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,7 +13,6 @@
 
 using namespace std;
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(netbase_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(netbase_networks)
@@ -65,15 +63,15 @@ BOOST_AUTO_TEST_CASE(netbase_splithost)
     BOOST_CHECK(TestSplitHost("www.bitcoin.org:80", "www.bitcoin.org", 80));
     BOOST_CHECK(TestSplitHost("[www.bitcoin.org]:80", "www.bitcoin.org", 80));
     BOOST_CHECK(TestSplitHost("127.0.0.1", "127.0.0.1", -1));
-    BOOST_CHECK(TestSplitHost("127.0.0.1:53572", "127.0.0.1", 53572));
+    BOOST_CHECK(TestSplitHost("127.0.0.1:51472", "127.0.0.1", 51472));
     BOOST_CHECK(TestSplitHost("[127.0.0.1]", "127.0.0.1", -1));
-    BOOST_CHECK(TestSplitHost("[127.0.0.1]:53572", "127.0.0.1", 53572));
+    BOOST_CHECK(TestSplitHost("[127.0.0.1]:51472", "127.0.0.1", 51472));
     BOOST_CHECK(TestSplitHost("::ffff:127.0.0.1", "::ffff:127.0.0.1", -1));
-    BOOST_CHECK(TestSplitHost("[::ffff:127.0.0.1]:53572", "::ffff:127.0.0.1", 53572));
-    BOOST_CHECK(TestSplitHost("[::]:53572", "::", 53572));
-    BOOST_CHECK(TestSplitHost("::53572", "::53572", -1));
-    BOOST_CHECK(TestSplitHost(":53572", "", 53572));
-    BOOST_CHECK(TestSplitHost("[]:53572", "", 53572));
+    BOOST_CHECK(TestSplitHost("[::ffff:127.0.0.1]:51472", "::ffff:127.0.0.1", 51472));
+    BOOST_CHECK(TestSplitHost("[::]:51472", "::", 51472));
+    BOOST_CHECK(TestSplitHost("::51472", "::51472", -1));
+    BOOST_CHECK(TestSplitHost(":51472", "", 51472));
+    BOOST_CHECK(TestSplitHost("[]:51472", "", 51472));
     BOOST_CHECK(TestSplitHost("", "", -1));
 }
 
@@ -88,10 +86,10 @@ bool static TestParse(string src, string canon)
 BOOST_AUTO_TEST_CASE(netbase_lookupnumeric)
 {
     BOOST_CHECK(TestParse("127.0.0.1", "127.0.0.1:65535"));
-    BOOST_CHECK(TestParse("127.0.0.1:53572", "127.0.0.1:53572"));
+    BOOST_CHECK(TestParse("127.0.0.1:51472", "127.0.0.1:51472"));
     BOOST_CHECK(TestParse("::ffff:127.0.0.1", "127.0.0.1:65535"));
     BOOST_CHECK(TestParse("::", "[::]:65535"));
-    BOOST_CHECK(TestParse("[::]:53572", "[::]:53572"));
+    BOOST_CHECK(TestParse("[::]:51472", "[::]:51472"));
     BOOST_CHECK(TestParse("[127.0.0.1]", "127.0.0.1:65535"));
     BOOST_CHECK(TestParse(":::", ""));
 }
@@ -147,15 +145,18 @@ BOOST_AUTO_TEST_CASE(subnet_test)
     BOOST_CHECK(CSubNet("1:2:3:4:5:6:7:8/128").IsValid());
     BOOST_CHECK(!CSubNet("1:2:3:4:5:6:7:8/129").IsValid());
     BOOST_CHECK(!CSubNet("fuzzy").IsValid());
+
     //CNetAddr constructor test
     BOOST_CHECK(CSubNet(CNetAddr("127.0.0.1")).IsValid());
     BOOST_CHECK(CSubNet(CNetAddr("127.0.0.1")).Match(CNetAddr("127.0.0.1")));
     BOOST_CHECK(!CSubNet(CNetAddr("127.0.0.1")).Match(CNetAddr("127.0.0.2")));
     BOOST_CHECK(CSubNet(CNetAddr("127.0.0.1")).ToString() == "127.0.0.1/32");
+
     BOOST_CHECK(CSubNet(CNetAddr("1:2:3:4:5:6:7:8")).IsValid());
     BOOST_CHECK(CSubNet(CNetAddr("1:2:3:4:5:6:7:8")).Match(CNetAddr("1:2:3:4:5:6:7:8")));
     BOOST_CHECK(!CSubNet(CNetAddr("1:2:3:4:5:6:7:8")).Match(CNetAddr("1:2:3:4:5:6:7:9")));
     BOOST_CHECK(CSubNet(CNetAddr("1:2:3:4:5:6:7:8")).ToString() == "1:2:3:4:5:6:7:8/128");
+
     CSubNet subnet = CSubNet("1.2.3.4/255.255.255.255");
     BOOST_CHECK_EQUAL(subnet.ToString(), "1.2.3.4/32");
     subnet = CSubNet("1.2.3.4/255.255.255.254");
@@ -222,6 +223,7 @@ BOOST_AUTO_TEST_CASE(subnet_test)
     BOOST_CHECK_EQUAL(subnet.ToString(), "0.0.0.0/1");
     subnet = CSubNet("1.2.3.4/0.0.0.0");
     BOOST_CHECK_EQUAL(subnet.ToString(), "0.0.0.0/0");
+
     subnet = CSubNet("1:2:3:4:5:6:7:8/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
     BOOST_CHECK_EQUAL(subnet.ToString(), "1:2:3:4:5:6:7:8/128");
     subnet = CSubNet("1:2:3:4:5:6:7:8/ffff:0000:0000:0000:0000:0000:0000:0000");
@@ -235,4 +237,3 @@ BOOST_AUTO_TEST_CASE(subnet_test)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

@@ -1,4 +1,5 @@
 // Copyright (c) 2013-2014 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,8 +14,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/test/unit_test.hpp>
 
-#ifdef DISABLE_FAILED_TEST
 #include <univalue.h>
+
 using namespace std;
 
 extern UniValue createArgs(int nRequired, const char* address1 = NULL, const char* address2 = NULL);
@@ -182,6 +183,4 @@ BOOST_AUTO_TEST_CASE(rpc_wallet)
     BOOST_CHECK(CBitcoinAddress(arr[0].get_str()).Get() == demoAddress.Get());
 }
 
-
 BOOST_AUTO_TEST_SUITE_END()
-#endif

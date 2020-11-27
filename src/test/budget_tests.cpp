@@ -1,5 +1,4 @@
-// Copyright (c) 2015-2018 The PIVX developers
-// Copyright (c) 2018-2020 The DAPS Project developers
+// Copyright (c) 2018 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,7 +9,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(budget_tests, TestingSetup)
 
 void CheckBudgetValue(int nHeight, std::string strNetwork, CAmount nExpectedValue)
@@ -28,9 +26,8 @@ BOOST_AUTO_TEST_CASE(budget_value)
     CheckBudgetValue(nHeightTest, "testnet", 7300*COIN);
 
     SelectParams(CBaseChainParams::MAIN);
-    nHeightTest = Params().LAST_POW_BLOCK + 1;
+    nHeightTest = 501;
     CheckBudgetValue(nHeightTest, "mainnet", 43200*COIN);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

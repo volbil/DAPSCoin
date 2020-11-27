@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2013 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -23,7 +24,6 @@
 using namespace std;
 using namespace boost::tuples;
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(bloom_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(bloom_create_insert_serialize)
@@ -462,4 +462,3 @@ BOOST_AUTO_TEST_CASE(merkle_block_4_test_update_none)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

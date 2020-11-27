@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2013 The Bitcoin Core developers
+// Copyright (c) 2017 The PIVX developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,7 +29,6 @@ public:
     }
 };
 
-#ifdef DISABLE_PASSED_TEST
 BOOST_FIXTURE_TEST_SUITE(pmt_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(pmt_test1)
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(pmt_test1)
         CBlock block;
         for (unsigned int j=0; j<nTx; j++) {
             CMutableTransaction tx;
-            tx.nLockTime = secp256k1_rand32(); // actual transaction data doesn't matter; just make the nLockTime's unique
+            tx.nLockTime = rand(); // actual transaction data doesn't matter; just make the nLockTime's unique
             block.vtx.push_back(CTransaction(tx));
         }
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(pmt_test1)
             std::vector<bool> vMatch(nTx, false);
             std::vector<uint256> vMatchTxid1;
             for (unsigned int j=0; j<nTx; j++) {
-                bool fInclude = (secp256k1_rand32() & ((1 << (att/2)) - 1)) == 0;
+                bool fInclude = (rand() & ((1 << (att/2)) - 1)) == 0;
                 vMatch[j] = fInclude;
                 if (fInclude)
                     vMatchTxid1.push_back(vTxid[j]);
@@ -108,4 +108,3 @@ BOOST_AUTO_TEST_CASE(pmt_test1)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif

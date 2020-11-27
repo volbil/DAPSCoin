@@ -1,15 +1,15 @@
 // Copyright (c) 2011-2014 The Bitcoin Core developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-//
+
 #include "timedata.h"
+#include "test/test_dapscoin.h"
 
 #include <boost/test/unit_test.hpp>
 
 using namespace std;
 
-#ifdef DISABLE_PASSED_TEST
-BOOST_AUTO_TEST_SUITE(timedata_tests)
+BOOST_FIXTURE_TEST_SUITE(timedata_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(util_MedianFilter)
 {
@@ -37,4 +37,3 @@ BOOST_AUTO_TEST_CASE(util_MedianFilter)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif
