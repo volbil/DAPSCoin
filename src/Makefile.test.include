@@ -38,7 +38,7 @@ GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.r
 
 BITCOIN_TEST_SUITE = \
   test/test_dapscoin.h \
-  test/test_dapscoin.cpp
+#  test/test_dapscoin.cpp
 # test_dapscoin binary #
 BITCOIN_TESTS =\
   test/allocator_tests.cpp \
@@ -72,7 +72,7 @@ BITCOIN_TESTS =\
   test/sighash_tests.cpp \
   test/sigopcount_tests.cpp \
   test/skiplist_tests.cpp \
-  test/test_dapscoin.cpp \
+  #test/test_dapscoin.cpp \
   test/timedata_tests.cpp \
   test/torcontrol_tests.cpp \
   test/transaction_tests.cpp \
