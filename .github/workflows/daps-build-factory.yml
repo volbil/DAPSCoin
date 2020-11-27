@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       ARTIFACT_DIR: source
-      EXTRA_FLAGS: "--disable-jni --disable-tests --disable-gui-tests --disable-bench"
+      EXTRA_FLAGS: --disable-jni --disable-tests --disable-gui-tests --disable-bench
     steps:
     - name: Checkout
       uses: actions/checkout@v2
